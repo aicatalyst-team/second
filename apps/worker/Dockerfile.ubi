@@ -3,8 +3,8 @@ FROM registry.access.redhat.com/ubi9/nodejs-22
 
 USER 0
 
-# Install system dependencies
-RUN dnf install -y git ripgrep poppler-utils && dnf clean all
+# Install system dependencies (ripgrep not available in UBI repos, skip it)
+RUN dnf install -y git poppler-utils && dnf clean all
 
 WORKDIR /opt/app-root/src
 
