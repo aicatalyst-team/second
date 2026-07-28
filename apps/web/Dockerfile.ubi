@@ -22,6 +22,7 @@ USER 1001
 
 # Stage 3: Production runtime
 FROM registry.access.redhat.com/ubi9/nodejs-22-minimal AS runner
+USER 0
 WORKDIR /opt/app-root/src
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
