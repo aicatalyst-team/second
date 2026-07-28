@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: poc-second
+  labels:
+    app: web
+    autopoc.io/project: second
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: image-registry.openshift-image-registry.svc:5000/autopoc-test-builds/second-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_TELEMETRY_DISABLED
+              value: "1"
+            - name: SECOND_AUTH_MODE
+              value: "none"
+            - name: MONGODB_URI
+              value: "mongodb://mongo:27017/second?replicaSet=rs0"
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+            - name: WORKER_URL
+              value: "http://worker:8081"
+            - name: SECOND_PUBLIC_URL
+              value: "http://web:8080"
+            - name: INTERNAL_API_TOKEN
+              value: "poc-internal-token"
+            - name: SECOND_TELEMETRY_DISABLED
+              value: "true"
+            - name: SECOND_SENTRY_DISABLED
+              value: "true"
+            - name: SECOND_ERROR_REPORTING_DISABLED
+              value: "true"
+            - name: SECOND_POSTHOG_DISABLED
+              value: "true"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

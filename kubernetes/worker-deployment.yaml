@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: poc-second
+  labels:
+    app: worker
+    autopoc.io/project: second
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: image-registry.openshift-image-registry.svc:5000/autopoc-test-builds/second-worker:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: PORT
+              value: "8081"
+            - name: NODE_ENV
+              value: "production"
+            - name: ANTHROPIC_API_KEY
+              value: "placeholder-not-needed-for-poc"
+            - name: INTERNAL_API_TOKEN
+              value: "poc-internal-token"
+            - name: TOOL_EXECUTE_URL
+              value: "http://web:8080/api/internal/tool-execute"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: poc-second
+  labels:
+    app: web
+    autopoc.io/project: second
+spec:
+  type: ClusterIP
+  selector:
+    app: web
+  ports:
+    - port: 8080
+      targetPort: 8080
