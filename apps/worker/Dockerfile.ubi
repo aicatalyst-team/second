@@ -1,0 +1,30 @@
+# UBI-based Dockerfile for Second Worker (Hono)
+FROM registry.access.redhat.com/ubi9/nodejs-22
+
+USER 0
+
+# Install system dependencies
+RUN dnf install -y git ripgrep poppler-utils && dnf clean all
+
+WORKDIR /opt/app-root/src
+
+# Copy dependency files and install
+COPY package.json package-lock.json* ./
+RUN npm install --production=false
+
+# Copy application code
+COPY . .
+
+# Create workspaces directory
+RUN mkdir -p /tmp/second-workspaces
+
+# OpenShift compatibility
+RUN chgrp -R 0 /opt/app-root /tmp/second-workspaces && \
+    chmod -R g=u /opt/app-root /tmp/second-workspaces
+
+ENV PORT=8081
+EXPOSE 8081
+
+USER 1001
+
+CMD ["node", "--import", "tsx", "src/index.ts"]

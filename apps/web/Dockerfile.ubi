@@ -1,0 +1,41 @@
+# UBI-based Dockerfile for Second Web (Next.js)
+# Multi-stage build: deps -> builder -> runner
+
+# Stage 1: Install dependencies
+FROM registry.access.redhat.com/ubi9/nodejs-22 AS deps
+USER 0
+WORKDIR /opt/app-root/src
+COPY package.json package-lock.json ./
+RUN npm ci
+USER 1001
+
+# Stage 2: Build the application
+FROM registry.access.redhat.com/ubi9/nodejs-22 AS builder
+USER 0
+WORKDIR /opt/app-root/src
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=deps /opt/app-root/src/node_modules ./node_modules
+COPY . .
+RUN npm run build
+USER 1001
+
+# Stage 3: Production runtime
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal AS runner
+WORKDIR /opt/app-root/src
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=8080
+
+COPY --from=builder /opt/app-root/src/public ./public
+COPY --from=builder /opt/app-root/src/.next/standalone ./
+COPY --from=builder /opt/app-root/src/.next/static ./.next/static
+
+RUN chgrp -R 0 /opt/app-root && chmod -R g=u /opt/app-root
+
+EXPOSE 8080
+
+USER 1001
+
+CMD ["node", "server.js"]
