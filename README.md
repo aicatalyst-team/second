@@ -1,4 +1,10 @@
-<p align="center">
+> [!WARNING]
+> **This repository is archived.**
+>
+> Archived on 2026-09-08 by the AI Catalyst Platform Team.
+> It is read-only and no longer maintained.
+
+---<p align="center">
   <picture>
     <source srcset="docs/assets/readme_cover.webp" type="image/webp">
     <img src="docs/assets/readme_cover.jpg" alt="Second — humans and agents, side by side" width="100%">
